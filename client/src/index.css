@@ -1,0 +1,11 @@
+@import "tailwindcss";
+
+* {
+    font-family: "Outfit", sans-serif;
+}
+
+.no-scrollbar::-webkit-scrollbar{
+    display:none;
+}
+
+/* -webkit-scrollbar {display:none} -=> means no scrollbar in Browsers(i.e. no scrollbar in Chrome, Edge, Safari  */
