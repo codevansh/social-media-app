@@ -18,6 +18,4 @@ app.get('/', (req, res) => {
 
 app.use("/api/inngest", serve({ client: inngest, functions }));
 
-const PORT = process.env.port || 4000
-
-app.listen(PORT, () => console.log(`Server Running on Port ${PORT}`));
+export default app;
