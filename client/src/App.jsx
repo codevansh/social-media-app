@@ -9,16 +9,12 @@ import Profile from './pages/Profile.jsx'
 import CreatePost from './pages/CreatePost.jsx'
 import Layout from './pages/Layout.jsx'
 import { Routes, Route } from 'react-router-dom'
-import { useUser } from '@clerk/clerk-react'
+import { useUser, useAuth } from '@clerk/clerk-react'
 import { Toaster } from 'react-hot-toast'
 
 const App = () => {
   const { user } = useUser();
-  // if (!user) {
-  //   return <Login />
-  // } else {
-  //   <Layout />
-  // }
+
   return (
     <>
       <Toaster />
@@ -35,8 +31,8 @@ const App = () => {
               <Route path='discover' element={<Discover />} />
               <Route path='profile' element={<Profile />} />
               <Route path='profile/:profileId' element={<Profile />} />
-             <Route path='/createpost' element={<CreatePost />} />
-             </Route>
+              <Route path='/createpost' element={<CreatePost />} />
+            </Route>
           </Routes>
         )
       }
