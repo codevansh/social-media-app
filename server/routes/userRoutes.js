@@ -25,6 +25,6 @@ userRouter.get('/connections', protect, getUserConnections)
 
 // ------------ // ------------ //
 userRouter.post('/profiles', getUserProfile)
-userRouter.get('/recentMessage', protect, getRecentChatMessage)
+userRouter.post('/recent-messages', protect, getRecentChatMessage)
 
 export default userRouter

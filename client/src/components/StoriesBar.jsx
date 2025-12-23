@@ -4,14 +4,35 @@ import { Plus } from 'lucide-react'
 import moment from 'moment';
 import StoryModel from './StoryModel';
 import StoryViewer from './StoryViewer';
+import { useAuth } from '@clerk/clerk-react';
+import api from '../api/axios';
+import toast from 'react-hot-toast';
 
 const StoriesBar = () => {
+    const { getToken } = useAuth()
+
     const [stories, setStories] = useState([])
     const [showModel, setShowModel] = useState(false)
     const [viewStory, setViewStory] = useState(null)
 
     const fetchStories = async () => {
-        setStories(dummyStoriesData)
+        try {
+            const token = await getToken()
+            const { data } = await api.get('/api/story/get', {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+
+            if(data.success){
+                setStories(data.stories)
+            }else{
+                toast(data.msg)
+            }
+
+        } catch (error) {
+            toast.error(error.msg)
+        }
     }
 
     useEffect(() => {
@@ -19,7 +40,7 @@ const StoriesBar = () => {
     }, [])
 
     return (
-        <div className='w-screen no-scrollbar px-4 py-4 lg:max-w-2xl overflow-x-auto'>
+        <div className='w-screen no-scrollbar px-4 py-4 lg:max-w-2xl overflow-x-auto sm:[calc(100vw-240px)]'>
 
             <div className='flex gap-4 pb-5 '>
 
@@ -39,7 +60,7 @@ const StoriesBar = () => {
 
                         <img src={story.user.profile_picture} alt='' className='absolute size-8 top-3 left-3 z-10 rounded-full ring ring-gray-100 shadow' />
 
-                        <p className='absolute top-3 left-3 text-white/60 text-sm truncate max-w-24 z-10'>{story.content}</p>
+                        <p className='absolute inset-0 flex items-center justify-center text-white text-sm text-center z-10 px-4'>{story.content}</p>
 
                         <p className='text-white absolute bottom-1 right-2 z-10 text-xs'>{moment(story.createdAt).fromNow()}</p>
                         {

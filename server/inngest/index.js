@@ -2,7 +2,7 @@ import { Inngest, step } from "inngest";
 import User from "../models/user.js";
 
 // Create a client to send and receive events
-export const inngest = new Inngest({ id: "pingup-app" });
+export const inngest = new Inngest({ id: "pingup-app", signingKey: process.env.INNGEST_SIGNING_KEY });
 
 //Inngest function to store the data into database.
 const syncUserCreation = inngest.createFunction(
@@ -67,37 +67,38 @@ const syncUserDeletion = inngest.createFunction(
     }
 )
 
-//Send email to user for a new connection request.
-// const sendnewConnectionRequest = inngest.createFunction(
-//     { id: "send-new-connection-request-reminder" },
-//     { event: "app/connection-request" },
-//     async ({ event, step }) => {
-//         const { connectionId } = event.data;
+// Send email to user for a new connection request.
+const sendnewConnectionRequest = inngest.createFunction(
+    { id: "send-new-connection-request-reminder" },
+    { event: "app/connection-request" },
+    async ({ event, step }) => {
+        const { connectionId } = event.data;
 
-//         await step.run('send-connections-request-mail', async () => {
-//             const connection = await Connection.findById(connectionId).populate('from_user_id to_user_id');
-//             const subject = `New Connection Request`;
-//             const body = `<div>
-//             <h2>Hi ${connection.to_user_id.full_name},</h2>
-//             <p> You have a connections request from  ${connection.from_user_id.full_name} - @${connection.from_user_id.username})</p>
-//             <p>CLick 
-//             <a href="${process.env.FRONTEND_URL}/connections">here</a> to view your connections.
-//             </p>
-//             <br/>
-//             <p>Thanks, <br/>PingUp Team</p>
-//             </div>`
+        await step.run('send-connections-request-mail', async () => {
+            const connection = await Connection.findById(connectionId).populate('from_user_id to_user_id');
+            const subject = `New Connection Request`;
+            const body = `<div>
+            <h2>Hi ${connection.to_user_id.full_name},</h2>
+            <p> You have a connections request from  ${connection.from_user_id.full_name} - @${connection.from_user_id.username})</p>
+            <p>CLick 
+            <a href="${process.env.FRONTEND_URL}/connections">here</a> to view your connections.
+            </p>
+            <br/>
+            <p>Thanks, <br/>PingUp Team</p>
+            </div>`
 
-// await sendEmail({
-//     to: connection.to_user_id.email,
-//     subject,
-//     body
-// })
-//         })
-//     }
-// )
+await sendEmail({
+    to: connection.to_user_id.email,
+    subject,
+    body
+})
+        })
+    }
+)
 
 export const functions = [
     syncUserCreation,
     syncUserUpdation,
     syncUserDeletion,
+    sendnewConnectionRequest
 ];

@@ -60,7 +60,14 @@ export const getPost = async (req, res) => {
         const { userId } = req.auth()
         const user = await User.findById(userId)
 
-        const userIds = [userId, ...user.connections, ...user.following]
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            })
+        }
+
+        const userIds = [userId, ...(user.connections || []), ...(user.following || [])].filter(id => id)
         const post = await Post.find({
             user: { $in: userIds }
         }).populate('user').sort({ createdAt: -1 })

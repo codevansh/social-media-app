@@ -1,21 +1,46 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { dummyUserData } from '../assets/assets'
 import { Pencil } from 'lucide-react'
+import { useDispatch, useSelector } from 'react-redux'
+import { updateUser } from '../features/user/userSlice'
+import { useAuth } from '@clerk/clerk-react'
 
 const EditProfile = ({ setShowEdit }) => {
 
-    const user = dummyUserData
+    const dispatch = useDispatch()
+    const { getToken } = useAuth()
+
+    const user = useSelector((state) => state.user.value)
     const [editForm, setEditForm] = useState({
-        full_name: user.full_name,
-        username: user.username,
-        bio: user.bio,
-        location: user.location,
+        full_name: user?.full_name,
+        username: user?.username,
+        bio: user?.bio,
+        location: user?.location,
         profile_picture: null,
         cover_photo: null,
     })
 
     const saveProfile = async (e) => {
         e.preventDefault();
+        try {
+
+            const userData = new FormData();
+            const { full_name, username, bio, location, profile_picture, cover_photo } = editForm
+
+            userData.append('username', username)
+            userData.append('full_name', full_name)
+            userData.append('bio', bio)
+            userData.append('location', location)
+            profile_picture && userData.append('profile', profile_picture)
+            cover_photo && userData.append('cover', cover_photo)
+
+            const token = await getToken()
+            dispatch(updateUser({ userData, token }))
+
+            setShowEdit(false)
+        } catch (error) {
+            toast.error(error.msg)
+        }
     }
 
     return (
@@ -27,7 +52,7 @@ const EditProfile = ({ setShowEdit }) => {
 
                     <h1 className='text-2xl font-bold text-gray-900 mb-4'>Edit Profile</h1>
 
-                    <form onSubmit={saveProfile} className='space-y-4'>
+                    <form onSubmit={(e) => toast.promise(saveProfile(e), { loading: 'Saving...' })} className='space-y-4'>
 
                         {/* Profile Picture */}
                         <div className='flex flex-col items-start gap-3'>
@@ -42,7 +67,7 @@ const EditProfile = ({ setShowEdit }) => {
 
                                 <div className='group/profile relative w-20 h-20 mt-2'>
 
-                                    <img src={editForm.profile_picture ? URL.createObjectURL(editForm.profile_picture) : user.profile_picture} className='w-full h-full rounded-full object-cover ' />
+                                    <img src={editForm.profile_picture ? URL.createObjectURL(editForm.profile_picture) : user?.profile_picture} className='w-full h-full rounded-full object-cover ' />
 
                                     <div className='absolute inset-0 hidden group-hover/profile:flex rounded-full items-center justify-center hover:bg-black/30'>
                                         <Pencil className='w-5 h-5 text-white' />
@@ -64,7 +89,7 @@ const EditProfile = ({ setShowEdit }) => {
 
                                 <div className='group/cover relative'>
 
-                                    <img src={editForm.cover_photo ? URL.createObjectURL(editForm.cover_photo) : user.cover_photo} className='w-80 h-40 rounded-lg bg-linear-to-r from-indigo-200 via-purple-200 to-pink-200 object-cover mt-2' />
+                                    <img src={editForm.cover_photo ? URL.createObjectURL(editForm.cover_photo) : user?.cover_photo} className='w-80 h-40 rounded-lg bg-linear-to-r from-indigo-200 via-purple-200 to-pink-200 object-cover mt-2' />
 
                                     <div className='absolute inset-0 hidden group-hover/cover:flex rounded-lg items-center justify-center hover:bg-black/30'>
                                         <Pencil className='w-5 h-5 text-white' />

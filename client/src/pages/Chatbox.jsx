@@ -1,19 +1,77 @@
 import { useRef, useState, useEffect } from "react";
 import { dummyMessagesData, dummyUserData } from "../assets/assets";
-import { ImageIcon,SendHorizontal } from "lucide-react";
-
-
+import { ImageIcon, SendHorizontal } from "lucide-react";
+import { connect, useDispatch, useSelector } from "react-redux";
+import { useParams } from "react-router-dom";
+import { useAuth } from '@clerk/clerk-react'
+import api from '../api/axios.js'
+import { addMessages, fetchMessages, resetMessages } from "../features/messagse/messageSlice.js";
+import toast from 'react-hot-toast'
 const Chatbox = () => {
 
-    const messages = dummyMessagesData
+    const {messages} = useSelector((state) => state.messages)
+    const { userId } = useParams()
+    const { getToken } = useAuth()
+    const dispatch = useDispatch()
+
     const [text, setText] = useState('')
     const [image, setImage] = useState(null)
-    const [user, setUser] = useState(dummyUserData)
+    const [user, setUser] = useState(null)
     const messagesEndRef = useRef(null)
 
-    const sendMessage = async () => {
+    const connections = useSelector((state) => state.connections.connections)
 
+    const fetchUserMEssages = async () => {
+        try {
+            const token = await getToken()
+            dispatch(fetchMessages({ token, userId }))
+        } catch (error) {
+            toast.error(error.msg)
+        }
     }
+
+    const sendMessage = async () => {
+        try {
+            if (!text && !image) return
+            const token = await getToken()
+            const formData = new FormData()
+
+            formData.append('to_user_id', userId)
+            formData.append('text', text)
+
+            image && formData('image')
+
+            const { data } = await api.post('/api/messages/send', formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+            if (data.success) {
+                setText("")
+                setImage(null)
+                dispatch(addMessages(data.msg))
+            } else {
+                throw new Error(data.msg)
+            }
+        } catch (error) {
+            toast.error(error.msg)
+        }
+    }
+
+    useEffect(() => {
+        if (connections.length > 0) {
+            const user = connections.find(connection => connection._id === userId)
+            setUser(user)
+        }
+    }, [connections, userId])
+
+    useEffect(() => {
+        fetchUserMEssages()
+        return () => {
+            dispatch(resetMessages())
+        }
+    }, [userId])
+
 
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behaviour: "smooth" })
@@ -74,8 +132,8 @@ const Chatbox = () => {
                         <input type="file" id="image" accept="image/*" hidden onChange={(e) => setImage(e.target.files[0])} />
                     </label>
 
-                    <button className="bg-linear-to-r from-indigo-600 to-purple-700 active:scale-95 transtion text-white font-medium px-4 py-2 rounded-md cursor-pointer flex gap-2" onClick={sendMessage}>Send 
-                        <SendHorizontal className="w-5"/>
+                    <button className="bg-linear-to-r from-indigo-600 to-purple-700 active:scale-95 transtion text-white font-medium px-4 py-2 rounded-md cursor-pointer flex gap-2" onClick={sendMessage}>Send
+                        <SendHorizontal className="w-5" />
                     </button>
                 </div>
 

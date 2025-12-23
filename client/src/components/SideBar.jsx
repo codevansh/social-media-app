@@ -4,15 +4,16 @@ import { Link, useNavigate } from 'react-router-dom'
 import MenuItems from './MenuItems'
 import { CirclePlus, LogOut } from 'lucide-react'
 import { UserButton, useClerk } from '@clerk/clerk-react'
+import { useSelector } from 'react-redux'
 
 const SideBar = ({ sideBarOpen, setSideBarOpen }) => {
 
     const navigate = useNavigate();
-    const user = dummyUserData;
+    const user = useSelector((state) => state.user.value)
     const { signOut } = useClerk()
 
     return (
-        <div className={`w-60 xl:w-60 bg-white border-r border-gray-200 flex flex-col justify-between items-center max-sm:absolute top-0 bottom-0 z-20 ${sideBarOpen ? 'translate-x-0' : 'max-sm:translate-x-full'} transition-all duration-300 ease-in-out`}>
+        <div className={`w-60 xl:w-60 bg-white border-r border-gray-200 flex flex-col justify-between items-center fixed top-0 bottom-0 left-0 z-20 ${sideBarOpen ? 'translate-x-0' : 'max-sm:translate-x-full'} transition-all duration-300 ease-in-out`}>
 
             <div className='w-full'>
                 <img src={assets.logo} alt="" className='w-26 ml-7 my-2 cursor-pointer' onClick={() => navigate('/')
@@ -28,11 +29,11 @@ const SideBar = ({ sideBarOpen, setSideBarOpen }) => {
                 <div className='flex items-center cursor-pointer gap-2 '>
                     <UserButton />
                     <div className='pr-11'>
-                        <h1 className='text-sm font-medium'>{user.full_name}</h1>
-                        <p className='text-xs text-gray-500'>@{user.username}</p>
+                        <h1 className='text-sm font-medium'>{user?.full_name}</h1>
+                        <p className='text-xs text-gray-500'>@{user?.username}</p>
                     </div>
                 </div>
-                <LogOut className='w-5 text-gray-400 hover:text-gray-700 transition cursor-pointer' onClick={signOut}/>
+                <LogOut className='w-5 text-gray-400 hover:text-gray-700 transition cursor-pointer' onClick={signOut} />
             </div>
         </div>
     )

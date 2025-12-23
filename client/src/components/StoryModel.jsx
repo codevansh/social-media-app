@@ -1,10 +1,13 @@
+import { useAuth } from '@clerk/clerk-react'
 import { ArrowLeft, Sparkle, TextIcon, Upload } from 'lucide-react'
 import React from 'react'
 import { useState } from 'react'
 import toast from 'react-hot-toast'
+import api from '../api/axios'
 
 const StoryModel = ({ setShowModel, fetchStories }) => {
 
+    const { getToken } = useAuth()
     const bgColors = ["red", "blue", "green", "yellow", "pink"]
     const [mode, setMode] = useState("text")
     const [bg, setBg] = useState(bgColors[0])
@@ -12,15 +15,80 @@ const StoryModel = ({ setShowModel, fetchStories }) => {
     const [media, setMedia] = useState(null)
     const [prevUrl, setPrevUrl] = useState(null)
 
+    const MAX_VIDEO_DURATION = 60 //seconds
+    const MAX_VIDEO_SIZE_MB = 50 //MB
+
     const handleMediaUpload = (e) => {
         const file = e.target.files?.[0]
         if (file) {
-            setMedia(file);
-            setPrevUrl(URL.createObjectURL(file))
+            if (file.type.startsWith('video')) {
+                if (file.size > MAX_VIDEO_SIZE_MB * 1024 * 1024) {
+                    toast.error("Video size cannot exceed 50MB")
+                    setMedia(null);
+                    setPrevUrl(URL.createObjectURL(null))
+                }
+
+                const video = document.createElement('video')
+
+                video.preload = 'metadata';
+                video.onloadedmetadata = () => {
+                    window.URL.revokeObjectURL(video.src)
+                    if (video.duration > MAX_VIDEO_DURATION) {
+                        toast.error("Video length cannot be more than 1 min")
+                        setMedia(null)
+                        setPrevUrl(null)
+                    } else {
+                        setMedia(file)
+                        setPrevUrl(URL.createObjectURL(file))
+                        setText('')
+                        setMode('media')
+                    }
+                }
+
+                video.src = URL.createObjectURL(file)
+            } else if (file.type.startsWith('image')) {
+                setMedia(file)
+                setPrevUrl(URL.createObjectURL(file))
+                setText('')
+                setMode('media')
+            }
         }
     }
 
     const handleCreateStory = async () => {
+        const media_type = mode === 'media' ? media?.type.startsWith('image') ? 'image' : 'video' : 'text'
+
+        if (media_type === text && !text) {
+            throw new Error("Enter some text")
+        }
+
+        let formData = new FormData()
+
+        formData.append('content', text)
+        formData.append('media_type', media_type)
+        formData.append('media', media)
+        formData.append('background', bg)
+
+        const token = await getToken()
+
+        try {
+            const { data } = await api.post('/api/story/create', formData, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+
+            if (data.success) {
+                setShowModel(false)
+                toast.success("Story created successfully")
+                fetchStories()
+            } else {
+                toast.error(data.msg)
+            }
+
+        } catch (error) {
+            toast.error(error.msg)
+        }
 
     }
 
@@ -64,15 +132,13 @@ const StoryModel = ({ setShowModel, fetchStories }) => {
                     </button>
 
                     <label className={`flex flex-1 items-center justify-center gap-2 p-2 cursor-pointer rounded-lg bg-white ${mode === 'media' ? " text-black" : " border-2"}`}>
-                        <input type="file" accept='image/*, video/*' className='hidden' onChange={(e) => { handleMediaUpload(e); setMode("media") }} />
+                        <input type="file" accept='image/*, video/*' className='hidden' onChange={handleMediaUpload} />
                         <Upload size={18} /> Photo/Video
                     </label>
 
                 </div>
                 <button onClick={(e) => toast.promise(handleCreateStory(), {
                     loading: 'Saving...',
-                    success: <p>Story Added</p>,
-                    error: <p>{e.message}</p>
                 })} className='flex items-center justify-center gap-2 text-white py-3 mt4 w-full bg-purple-600 cursor-pointer mt-4  rounded-lg'>
                     <Sparkle size={18} /> Create Story
                 </button>

@@ -1,4 +1,3 @@
-import { success } from 'zod';
 import imagekit from '../configs/imagekit.js';
 import Connection from '../models/connections.js';
 import User from '../models/user.js'
@@ -8,11 +7,28 @@ import Post from '../models/post.js';
 export const getUserData = async (req, res) => {
     try {
         const { userId } = req.auth()
-        const user = await User.findById(userId)
+        let user = await User.findById(userId)
+        console.log(user)
         if (!user) {
-            return res.json({
-                success: false,
-                msg: "User not found"
+            // If user doesn't exist in DB, create it (fallback for Inngest failure)
+            const clerkUser = await req.auth() // Get full user data from Clerk
+            const email = clerkUser.email_addresses[0]?.email_address
+            const firstName = clerkUser.first_name || ''
+            const lastName = clerkUser.last_name || ''
+            const profilePic = clerkUser.image_url || ''
+
+            let username = email.split('@')[0]
+            const existingUser = await User.findOne({ username })
+            if (existingUser) {
+                username = username + Math.floor(Math.random() * 10000)
+            }
+
+            user = await User.create({
+                _id: userId,
+                email,
+                full_name: firstName + ' ' + lastName,
+                profile_picture: profilePic,
+                username,
             })
         }
         res.json({
@@ -23,7 +39,7 @@ export const getUserData = async (req, res) => {
         console.log(error)
         res.json({
             success: false,
-            msg: error.msg
+            msg: error.message
         })
     }
 }
@@ -236,7 +252,7 @@ export const sendConnectionRequest = async (req, res) => {
                 from_user_id: userId,
                 to_user_id: id
             })
-            
+
             return res.json({
                 success: true,
                 msg: "Connection Request sent successfully"
@@ -352,7 +368,7 @@ export const getUserProfile = async (req, res) => {
         const posts = Post.find({
             user: profileId
         }).populate('user')
-        
+
         res.json({
             success: true,
             profile,

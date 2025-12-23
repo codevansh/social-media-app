@@ -1,25 +1,51 @@
-import react from "react";
+import react, { useEffect } from "react";
 import { useState } from "react";
 import { dummyConnectionsData } from "../assets/assets";
 import { Search, User } from "lucide-react";
 import UserCard from "../components/UserCard";
 import Loading from "../components/Loading";
+import api from '../api/axios.js'
+import { useAuth } from '@clerk/clerk-react'
+import toast from 'react-hot-toast'
+import { useDispatch } from "react-redux";
+import fetchUser from '../features/user/userSlice.js'
+
 const Discover = () => {
 
     const [input, setInput] = useState("");
-    const [users, setUsers] = useState(dummyConnectionsData);
+    const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(false);
+    const { getToken } = useAuth()
+    const dispatch = useDispatch()
 
     const handleSearch = async (e) => {
         if (e.key === 'Enter') {
-            setUsers([])
-            setLoading(true);
-            setTimeout(() => {
-                setUsers(dummyConnectionsData)
-                setLoading(false);
-            }, 1000)
+            try {
+                setUsers([])
+                setLoading(true)
+
+                const { data } = await api.post('/api/user/discover', { input }, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                })
+
+                data.success ? setUsers(data.users) : toast.error(data.msg)
+                setLoading(false)
+                setInput("")
+
+            } catch (error) {
+                toast.error(error.msg)
+            }
+            setLoading(false)
         }
     }
+
+    useEffect(() => {
+        getToken().then((token) => {
+            dispatch(fetchUser(token))
+        })
+    }, [])
 
     return (
         <div className="min-h-screen bg-liner-to-b from-slate-50 to-white">
@@ -48,7 +74,7 @@ const Discover = () => {
                     ))}
                 </div>
                 {
-                    loading && (<Loading height='60vh'/>)
+                    loading && (<Loading height='60vh' />)
                 }
             </div>
         </div>

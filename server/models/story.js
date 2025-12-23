@@ -32,7 +32,9 @@ const StorySchema = new mongoose.Schema({
 
 StorySchema.index(
     { createdAt: 1 },
-    { expireAfterSeconds: 86400 }
+    { expireAfterSeconds: 86400 },
+    // { maxLength: 60 },
+    // { max_size: 5 * 10 * 1024 * 1024}
 );
 
 const Story = mongoose.model("Story", StorySchema);

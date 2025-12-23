@@ -3,17 +3,45 @@ import moment from 'moment'
 import React, { useState } from 'react'
 import { dummyUserData } from '../assets/assets'
 import { useNavigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
+import { useAuth } from '@clerk/clerk-react'
+import api from '../api/axios.js'
 
 const PostCard = ({ post }) => {
 
     const postwithHashtags = post.content.replace(/(#\w+)/g, '<span class="text-indigo-600">$1</span>')
 
+    const getToken = useAuth()
+
     const [likes, setLikes] = useState(post.likes_count)
 
-    const currectUser = dummyUserData;
+    const currentUser = useSelector((state) => {
+        return state.user.value
+    });
 
     const handleLike = async () => {
-
+        try {
+            const { data } = await api.post('/api/post/like', { postId: post._id }, {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+            if (data.success) {
+                toast.success(data.msg)
+                setLikes(prev => {
+                    if (prev.includes(currentUser._id)) {
+                        return prev.filter(id => id !== currentUser._id)
+                    }
+                    else {
+                        return [...prev, currentUser._id]
+                    }
+                })
+            } else {
+                toast(data.msg)
+            }
+        } catch (error) {
+            toast.error(error.msg)
+        }
     }
 
     const navigate = useNavigate()
@@ -37,7 +65,6 @@ const PostCard = ({ post }) => {
 
             {post.content && <div className='text-gray-500 text-sm whitespace-pre-line' dangerouslySetInnerHTML={{ __html: postwithHashtags }} />}
 
-
             <div className='grid grid-cols-2 gap-2'>
                 {post.image_urls.map((img, index) => (
                     <img src={img} alt="" key={index} className={`w-full h-48 object-cover rounded-lg ${post.image_urls.length === 1 && 'col-span-2 h-auto'}`} />
@@ -47,7 +74,7 @@ const PostCard = ({ post }) => {
 
             <div className='flex items-center gap-4 text-gray-600 text-sm pt-2 border-t border-gray-300'>
                 <div className='flex items-center gap-1'>
-                    <Heart className={`w-4 h-4 cursor-pointer ${likes.includes(currectUser._id) && 'text-red-500 fill-red-500'}`} onClick={handleLike} />
+                    <Heart className={`w-4 h-4 cursor-pointer ${likes.includes(currectUser?._id) && 'text-red-500 fill-red-500'}`} onClick={handleLike} />
                     <span>{likes.length}</span>
                 </div>
                 <div className='flex items-center gap-1'>

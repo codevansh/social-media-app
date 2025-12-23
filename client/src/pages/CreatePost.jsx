@@ -2,19 +2,56 @@ import react, { useState } from "react";
 import { dummyUserData } from "../assets/assets";
 import { Image, X } from "lucide-react";
 import toast from "react-hot-toast";
+import { useSelector } from "react-redux";
+import { useAuth } from "@clerk/clerk-react";
+import api from '../api/axios.js'
+import { useNavigate } from "react-router-dom";
 
 const CreatePost = () => {
 
     const [content, setContent] = useState('')
     const [images, setImages] = useState([])
     const [loading, setLoading] = useState(false)
+    const navigate = useNavigate()
+    const { getToken } = useAuth()
 
-    const user = dummyUserData
+    const user = useSelector((state) => state.user.value)
 
     const handleSubmit = async () => {
+        if (!images.length && !content) {
+            return toast.error('Please add at least one image or text')
+        }
+        setLoading(true)
 
+        const postType = images.length && content ? 'text_with_image' : images.length ? 'image' : 'text'
+
+        try {
+            const formData = new FormData()
+            formData.append('content', content)
+            formData.append('post_type', postType)
+            images.map((images) => {
+                formData.append('images', images)
+            })
+
+            const { data } = await api.post('/api/post/add', formData, {
+                headers: {
+                    Authorization: `Bearer ${await getToken()}`
+                }
+            })
+
+            if (data.success) {
+                navigate('/')
+            } else {
+                console.log(data.msg)
+                throw new Error(data.msg)
+            }
+
+        } catch (error) {
+            console.log(error.msg)
+            throw new Error(error.msg)
+        }
+        setLoading(false)
     }
-
     return (
         <div className="min-h-screen bg-linear-to-b from-slate-50 to white">
             <div className="max-w-6xl mx-auto p-6">
@@ -27,10 +64,10 @@ const CreatePost = () => {
 
                     {/* header */}
                     <div className="flex items-center gap-3">
-                        <img src={user.profile_picture} className="w-12 h-12 rounded-full shadow" />
+                        <img src={user?.profile_picture} className="w-12 h-12 rounded-full shadow" />
                         <div>
-                            <h2 className="font-semibold">{user.full_name}</h2>
-                            <p className="text-sm text-gray-500">@{user.username}</p>
+                            <h2 className="font-semibold">{user?.full_name}</h2>
+                            <p className="text-sm text-gray-500">@{user?.username}</p>
                         </div>
                     </div>
 
@@ -64,15 +101,15 @@ const CreatePost = () => {
 
                         <input type="file" id="images" accept="image/*" hidden multiple onChange={(e) => setImages([...images, ...e.target.files])} />
 
-                        <button className="text-sm bg-linear-to-r from-indigo-600 to-purple-700 active:scale-95 transtion text-white font-medium px-8 py-2 rounded-md cursor-pointer" 
-                        onClick={() => toast.promise(
-                            handleSubmit(),
-                            {
-                                loading: 'uploading..',
-                                success: <p>Post Added</p>,
-                                error: <p>Post Not Added</p>
-                            }
-                        )} disabled={loading}>
+                        <button className="text-sm bg-linear-to-r from-indigo-600 to-purple-700 active:scale-95 transtion text-white font-medium px-8 py-2 rounded-md cursor-pointer"
+                            onClick={() => toast.promise(
+                                handleSubmit(),
+                                {
+                                    loading: 'uploading..',
+                                    success: <p>Post Added</p>,
+                                    error: <p>Post Not Added</p>
+                                }
+                            )} disabled={loading}>
                             Publish Post
                         </button>
 
