@@ -3,13 +3,14 @@ import Connection from '../models/connections.js';
 import User from '../models/user.js'
 import fs from 'fs'
 import Post from '../models/post.js';
+import { clerkClient } from '@clerk/express'
 
 export const getUserData = async (req, res) => {
     try {
         const { userId } = req.auth()
         let user = await User.findById(userId)
         if (!user) {
-            const clerkUser = await req.auth() 
+            const clerkUser = await clerkClient.users.getUser(userId)
             const email = clerkUser.email_addresses[0]?.email_address
             const firstName = clerkUser.first_name || ''
             const lastName = clerkUser.last_name || ''
@@ -141,7 +142,7 @@ export const discoverUsers = async (req, res) => {
             ]
         })
 
-        const filteredUsers = allUsers.filter(user => user._id !== userId)
+        const filteredUsers = allUsers.filter(user => user._id.toString() !== userId)
         res.json({
             success: true,
             users: filteredUsers
@@ -163,7 +164,7 @@ export const followUser = async (req, res) => {
 
         const user = await User.findById(userId)
 
-        if (user.following.includes(id)) {
+        if (user.following.some(u => u.toString() === id)) {
             return res.json({
                 success: false,
                 msg: "You are already following this user"
@@ -196,11 +197,11 @@ export const unfollowUser = async (req, res) => {
         const { id } = req.body;  // id of the other users
 
         const user = await User.findById(userId)
-        user.following = user.following.filter(user => user !== id)
+        user.following = user.following.filter(u => u.toString() !== id)
         await user.save()
 
         const toUser = await User.findById(id)
-        toUser.followers = toUser.followers.filter(user => user !== userId)
+        toUser.followers = toUser.followers.filter(u => u.toString() !== id)
         await toUser.save()
 
         res.json({
@@ -337,7 +338,7 @@ export const acceptConnections = async (req, res) => {
         await connection.save()
 
         res.json({
-            succes: true,
+            success: true,
             msg: "Connection Accepted"
         })
 
@@ -357,7 +358,7 @@ export const getUserProfile = async (req, res) => {
         const profile = await User.findById(profileId)
 
         if (!profile) {
-            res.json({
+            return res.json({
                 success: false,
             })
         }
