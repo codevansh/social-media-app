@@ -7,7 +7,7 @@ import { fetchConnections } from '../features/connections/connectionSlice';
 import api from '../api/axios.js'
 
 const Connections = () => {
-    const { connections, pendingConnections, followers, following } = useSelector((state) => state.connections)
+    const { connections, pendingConnections, followers, following } = useSelector((state) => state.connection)
 
     const navigate = useNavigate()
     const dispatch = useDispatch()

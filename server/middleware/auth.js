@@ -1,6 +1,6 @@
-export const protect = (req, res, next) => {
+export const protect = async (req, res, next) => {
     try {
-        const { userId } = req.auth();
+        const { userId } = await req.auth();
         if (!userId) {
             return res.status(401).json({
                 success: false,
@@ -11,7 +11,7 @@ export const protect = (req, res, next) => {
     } catch (error) {
         return res.status(401).json({
             success: false,
-            msg: 'Unauthorized'
+            msg: error.msg
         });
     }
 }

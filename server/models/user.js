@@ -32,7 +32,7 @@ const UserSchema = new mongoose.Schema({
 
     bio: {
         type: String,
-        default: ""
+        default: "Hey there! I am new to Pingup"
     },
 
     profile_picture: {

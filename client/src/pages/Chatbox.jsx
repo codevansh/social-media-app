@@ -9,7 +9,7 @@ import { addMessages, fetchMessages, resetMessages } from "../features/messagse/
 import toast from 'react-hot-toast'
 const Chatbox = () => {
 
-    const {messages} = useSelector((state) => state.messages)
+    const { messages } = useSelector((state) => state.messages)
     const { userId } = useParams()
     const { getToken } = useAuth()
     const dispatch = useDispatch()
@@ -19,7 +19,7 @@ const Chatbox = () => {
     const [user, setUser] = useState(null)
     const messagesEndRef = useRef(null)
 
-    const connections = useSelector((state) => state.connections.connections)
+    const connections = useSelector((state) => state.connection.connections)
 
     const fetchUserMEssages = async () => {
         try {
@@ -39,7 +39,7 @@ const Chatbox = () => {
             formData.append('to_user_id', userId)
             formData.append('text', text)
 
-            image && formData('image')
+            if (image) formData.append('image', image)
 
             const { data } = await api.post('/api/messages/send', formData, {
                 headers: {

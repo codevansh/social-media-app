@@ -17,7 +17,7 @@ const Layout = () => {
     return (
         <div className='w-full flex h-screen overflow-hidden'>
             <SideBar sideBarOpen={sideBarOpen} setSideBarOpen={setSideBarOpen} />
-            <div className='flex-1 bg-slate-50 overflow-y-auto'>
+            <div className='flex-1 bg-slate-50 overflow-y-auto xl:ml-60'>
                 {/* <Feed /> */}
                 <Outlet />
             </div>

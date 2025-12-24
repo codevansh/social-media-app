@@ -58,7 +58,7 @@ const StoryModel = ({ setShowModel, fetchStories }) => {
     const handleCreateStory = async () => {
         const media_type = mode === 'media' ? media?.type.startsWith('image') ? 'image' : 'video' : 'text'
 
-        if (media_type === text && !text) {
+        if (media_type === 'text' && !text) {
             throw new Error("Enter some text")
         }
 

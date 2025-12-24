@@ -1,4 +1,3 @@
-import fs from 'fs'
 import imagekit from '../configs/imagekit.js';
 import Story from '../models/story.js';
 import User from '../models/user.js'
@@ -7,15 +6,16 @@ import User from '../models/user.js'
 export const addUserStory = async (req, res) => {
     try {
         const { userId } = req.auth()
-        const { content, media_type, bg_color } = req.body
+        const { content, media_type, background: bg_color } = req.body
         const media = req.file;
 
         let media_url = ''
         if (media_type === 'image' || media_type === 'video') {
-            const fileBuffer = fs.readFileSync(media.path)
+            const fileBuffer = media.buffer
             const response = await imagekit.upload({
                 file: fileBuffer,
                 fileName: media.originalname,
+                folder: "stories"
             })
             media_url = response.url;
         }
@@ -23,7 +23,7 @@ export const addUserStory = async (req, res) => {
         const story = await Story.create({
             user: userId,
             content,
-            media_url,
+            media_urls: media_url ? [media_url] : [],
             media_type,
             bg_color
         })
@@ -34,10 +34,10 @@ export const addUserStory = async (req, res) => {
         })
 
     } catch (error) {
-        console.log(error)
+        console.log('Error in addUserStory:', error)
         res.json({
             success: false,
-            msg: error.msg
+            msg: error.message || error.msg
         })
     }
 }

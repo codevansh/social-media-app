@@ -8,6 +8,8 @@ import moment from 'moment'
 import EditProfile from "../components/EditProfile";
 import { useAuth } from "@clerk/clerk-react";
 import { useSelector } from "react-redux";
+import{toast} from 'react-hot-toast'
+import api from '../api/axios.js'
 
 const Profile = () => {
 
@@ -19,7 +21,7 @@ const Profile = () => {
     const [activeTab, setActiveTab] = useState('Posts');
     const [showEdit, setShowEdit] = useState(false);
 
-    const fetchUser = async (profileId) => {
+    const fetchUserProfile = async (profileId) => {
         const token = await getToken()
         try {
             const { data } = await api.post(`/api/user/profiles`, { profileId }, {
@@ -31,8 +33,9 @@ const Profile = () => {
             if (data.success) {
                 setUser(data.profile)
                 setPosts(data.posts)
+
             } else {
-                toast.error(data.msg)
+                toast.error(error.response?.data?.msg || error.message)
             }
         } catch (error) {
             toast.error(error.msg)
@@ -41,11 +44,11 @@ const Profile = () => {
     }
 
     useEffect(() => {
-         if (!currentUser && !profileId) return;
+        if (!currentUser && !profileId) return;
         if (profileId) {
-            fetchUser(profileId)
+            fetchUserProfile(profileId)
         } else {
-            fetchUser(currentUser._id)
+            fetchUserProfile(currentUser._id)
         }
     }, [profileId, currentUser])
 

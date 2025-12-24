@@ -4,6 +4,7 @@ import { Pencil } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
 import { updateUser } from '../features/user/userSlice'
 import { useAuth } from '@clerk/clerk-react'
+import {toast} from 'react-hot-toast'
 
 const EditProfile = ({ setShowEdit }) => {
 
@@ -45,37 +46,29 @@ const EditProfile = ({ setShowEdit }) => {
 
     return (
         <div className='fixed inset-0 z-50 bg-black/50 overflow-y-auto'>
-
             <div className='max-w-2xl sm:py-6 mx-auto'>
-
                 <div className='bg-white rounded-lg shadow p-6'>
-
                     <h1 className='text-2xl font-bold text-gray-900 mb-4'>Edit Profile</h1>
-
                     <form onSubmit={(e) => toast.promise(saveProfile(e), { loading: 'Saving...' })} className='space-y-4'>
-
                         {/* Profile Picture */}
                         <div className='flex flex-col items-start gap-3'>
-
                             <label className='block text-sm font-medium text-gray-700 mb-1' htmlFor='profile_picture'>
                                 Profile Picture
-
                                 <input hidden type="file" accept='image/*' id='profile_picture' className='w-full p-3 border border-gray-200 rounded-lg' onChange={(e) => setEditForm({
                                     ...editForm,
                                     profile_picture: e.target.files[0]
                                 })} />
-
                                 <div className='group/profile relative w-20 h-20 mt-2'>
-
-                                    <img src={editForm.profile_picture ? URL.createObjectURL(editForm.profile_picture) : user?.profile_picture} className='w-full h-full rounded-full object-cover ' />
-
+                                    {(editForm.profile_picture || (user?.profile_picture && user.profile_picture !== "")) && (
+                                        <img src={editForm.profile_picture ? URL.createObjectURL(editForm.profile_picture) : user?.profile_picture} className='w-full h-full rounded-full object-cover ' />
+                                    )}
                                     <div className='absolute inset-0 hidden group-hover/profile:flex rounded-full items-center justify-center hover:bg-black/30'>
                                         <Pencil className='w-5 h-5 text-white' />
                                     </div>
                                 </div>
                             </label>
                         </div>
-
+                        
                         {/* Cover Photo */}
                         <div className='flex flex-col items-start gap-3'>
 
@@ -88,8 +81,9 @@ const EditProfile = ({ setShowEdit }) => {
                                 })} />
 
                                 <div className='group/cover relative'>
-
-                                    <img src={editForm.cover_photo ? URL.createObjectURL(editForm.cover_photo) : user?.cover_photo} className='w-80 h-40 rounded-lg bg-linear-to-r from-indigo-200 via-purple-200 to-pink-200 object-cover mt-2' />
+                                    {(editForm.cover_photo || (user?.cover_photo && user.cover_photo !== "")) && (
+                                        <img src={editForm.cover_photo ? URL.createObjectURL(editForm.cover_photo) : user?.cover_photo} className='w-80 h-40 rounded-lg bg-linear-to-r from-indigo-200 via-purple-200 to-pink-200 object-cover mt-2' />
+                                    )}
 
                                     <div className='absolute inset-0 hidden group-hover/cover:flex rounded-lg items-center justify-center hover:bg-black/30'>
                                         <Pencil className='w-5 h-5 text-white' />

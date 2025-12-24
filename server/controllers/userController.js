@@ -8,10 +8,8 @@ export const getUserData = async (req, res) => {
     try {
         const { userId } = req.auth()
         let user = await User.findById(userId)
-        console.log(user)
         if (!user) {
-            // If user doesn't exist in DB, create it (fallback for Inngest failure)
-            const clerkUser = await req.auth() // Get full user data from Clerk
+            const clerkUser = await req.auth() 
             const email = clerkUser.email_addresses[0]?.email_address
             const firstName = clerkUser.first_name || ''
             const lastName = clerkUser.last_name || ''
@@ -95,7 +93,7 @@ export const updateUserData = async (req, res) => {
             const buffer = fs.readFileSync(cover.path)
             const response = await imagekit.upload({
                 file: buffer,
-                fileName: profile.originalname,
+                fileName: cover.originalname,
             })
 
             const url = imagekit.url({
@@ -122,9 +120,9 @@ export const updateUserData = async (req, res) => {
 
     } catch (error) {
         console.log(error);
-        resizeBy.json({
+        res.json({
             success: false,
-            msg: error.msg
+            msg: error.message
         })
     }
 }
@@ -361,11 +359,10 @@ export const getUserProfile = async (req, res) => {
         if (!profile) {
             res.json({
                 success: false,
-                msg: "User Profile not found"
             })
         }
 
-        const posts = Post.find({
+        const posts = await Post.find({
             user: profileId
         }).populate('user')
 
@@ -374,7 +371,6 @@ export const getUserProfile = async (req, res) => {
             profile,
             posts
         })
-
 
     } catch (error) {
         console.log(error)

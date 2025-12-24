@@ -19,39 +19,48 @@ const CreatePost = () => {
 
     const handleSubmit = async () => {
         if (!images.length && !content) {
-            return toast.error('Please add at least one image or text')
+            return Promise.reject(new Error('Please add at least one image or text'))
         }
+    
         setLoading(true)
-
-        const postType = images.length && content ? 'text_with_image' : images.length ? 'image' : 'text'
-
+    
+        const postType =
+            images.length && content
+                ? 'text_with_image'
+                : images.length
+                ? 'image'
+                : 'text'
+    
         try {
             const formData = new FormData()
             formData.append('content', content)
             formData.append('post_type', postType)
-            images.map((images) => {
-                formData.append('images', images)
+    
+            images.forEach((img) => {
+                formData.append('images', img)
             })
-
+    
             const { data } = await api.post('/api/post/add', formData, {
                 headers: {
                     Authorization: `Bearer ${await getToken()}`
                 }
             })
-
-            if (data.success) {
-                navigate('/')
-            } else {
-                console.log(data.msg)
-                throw new Error(data.msg)
+    
+            if (!data.success) {
+                return Promise.reject(new Error(data.msg || 'Post creation failed'))
             }
-
+    
+            navigate('/')
+            return data
         } catch (error) {
-            console.log(error.msg)
-            throw new Error(error.msg)
+            return Promise.reject(
+                error instanceof Error ? error : new Error('Post Not Added')
+            )
+        } finally {
+            setLoading(false)
         }
-        setLoading(false)
-    }
+    }    
+
     return (
         <div className="min-h-screen bg-linear-to-b from-slate-50 to white">
             <div className="max-w-6xl mx-auto p-6">
@@ -107,7 +116,7 @@ const CreatePost = () => {
                                 {
                                     loading: 'uploading..',
                                     success: <p>Post Added</p>,
-                                    error: <p>Post Not Added</p>
+                                    error: (err) => err.message
                                 }
                             )} disabled={loading}>
                             Publish Post

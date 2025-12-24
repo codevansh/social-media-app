@@ -1,4 +1,3 @@
-import fs from "fs"
 import imagekit from "../configs/imagekit.js"
 import Post from "../models/post.js";
 import User from "../models/user.js";
@@ -6,30 +5,23 @@ import User from "../models/user.js";
 //add post
 export const addPost = async (req, res) => {
     try {
-        const { userId } = req.auth()
+        const { userId } = req.auth
         const { content, post_type } = req.body;
-        const images = req.files;
+        const images = req.files || [];
 
         let image_urls = []
-        if (images.length) {
+
+        if (images.length > 0) {
             image_urls = await Promise.all(
                 images.map(async (image) => {
-                    const fileBuffer = fs.readFileSync(image.path)
+                    const fileBuffer = image.buffer
                     const response = await imagekit.upload({
                         file: fileBuffer,
                         fileName: image.originalname,
                         folder: "posts"
                     })
 
-                    const url = imagekit.url({
-                        path: response.filePath,
-                        transformation: [
-                            { quality: 'auto' },
-                            { format: 'webp' },
-                            { width: '1280' }
-                        ]
-                    })
-                    return url
+                    return response.url
 
                 })
             )
@@ -49,7 +41,7 @@ export const addPost = async (req, res) => {
         console.log(error)
         res.status(500).json({
             success: false,
-            message: "Error creating post" || error.message
+            msg: error.message || "Error creating post"
         })
     }
 }
@@ -57,7 +49,7 @@ export const addPost = async (req, res) => {
 //get post
 export const getPost = async (req, res) => {
     try {
-        const { userId } = req.auth()
+        const { userId } = req.auth
         const user = await User.findById(userId)
 
         if (!user) {
@@ -89,9 +81,15 @@ export const getPost = async (req, res) => {
 //like posts
 export const likePosts = async (req, res) => {
     try {
-        const { userId } = req.auth()
+        const { userId } = req.auth
         const { postId } = req.body;
+
         const post = await Post.findById(postId)
+        if (!post) {
+            return res.status(404).json({ success: false, message: "Post not found" });
+        }
+
+        post.likes_count = post.likes_count || [];
 
         if (post.likes_count.includes(userId)) {
             post.likes_count = post.likes_count.filter(user => user !== userId)

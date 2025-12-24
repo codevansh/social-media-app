@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import { useAuth } from '@clerk/clerk-react'
 import api from '../api/axios.js'
+import { toast } from 'react-hot-toast'
 
 const PostCard = ({ post }) => {
 
@@ -23,7 +24,7 @@ const PostCard = ({ post }) => {
         try {
             const { data } = await api.post('/api/post/like', { postId: post._id }, {
                 headers: {
-                    Authorization: `Bearer ${token}`
+                    Authorization: `Bearer ${await getToken()}`
                 }
             })
             if (data.success) {
@@ -74,16 +75,16 @@ const PostCard = ({ post }) => {
 
             <div className='flex items-center gap-4 text-gray-600 text-sm pt-2 border-t border-gray-300'>
                 <div className='flex items-center gap-1'>
-                    <Heart className={`w-4 h-4 cursor-pointer ${likes.includes(currectUser?._id) && 'text-red-500 fill-red-500'}`} onClick={handleLike} />
+                    <Heart className={`w-4 h-4 cursor-pointer ${likes.includes(currentUser?._id) && 'text-red-500 fill-red-500'}`} onClick={handleLike} />
                     <span>{likes.length}</span>
                 </div>
                 <div className='flex items-center gap-1'>
                     <MessageCircle className='w-4 h-4' />
-                    <span>{12}</span>
+                    <span>{post.comments_count || 0}</span>
                 </div>
                 <div className='flex items-center gap-1'>
                     <Share2 className='w-4 h-4' />
-                    <span>{7}</span>
+                    <span>{post.shares_count || 0}</span>
                 </div>
             </div>
         </div >

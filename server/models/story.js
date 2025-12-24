@@ -10,7 +10,7 @@ const StorySchema = new mongoose.Schema({
         type: String,
     },
     media_urls: {
-        type: String
+        type: [String]
     },
     media_type: {
         type: String,

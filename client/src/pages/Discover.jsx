@@ -8,7 +8,7 @@ import api from '../api/axios.js'
 import { useAuth } from '@clerk/clerk-react'
 import toast from 'react-hot-toast'
 import { useDispatch } from "react-redux";
-import fetchUser from '../features/user/userSlice.js'
+import {fetchUser} from '../features/user/userSlice.js'
 
 const Discover = () => {
 
@@ -24,6 +24,7 @@ const Discover = () => {
                 setUsers([])
                 setLoading(true)
 
+                const token = await getToken()
                 const { data } = await api.post('/api/user/discover', { input }, {
                     headers: {
                         Authorization: `Bearer ${token}`

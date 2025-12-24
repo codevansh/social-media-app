@@ -1,12 +1,23 @@
 import { Eye, MessageSquare } from "lucide-react";
 import { dummyConnectionsData } from "../assets/assets";
 import { useNavigate } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { useAuth } from "@clerk/clerk-react";
+import { fetchConnections } from "../features/connections/connectionSlice";
 
 const Messages = () => {
 
-    const { connections } = useSelector((state) => state.connections)
+    const { connections } = useSelector((state) => state.connection)
     const navigate = useNavigate()
+    const dispatch = useDispatch()
+    const { getToken } = useAuth()
+
+    useEffect(() => {
+        getToken().then((token) => {
+            dispatch(fetchConnections(token))
+        })
+    }, [dispatch, getToken])
 
     return (
         <div className="min-h-screen relative bg-slate-50">

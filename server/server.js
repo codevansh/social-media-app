@@ -17,15 +17,7 @@ app.use(express.json());
 app.use(cors());
 app.use(clerkMiddleware());
 
-// ✅ Lazy DB connection (safe for serverless)
-let isConnected = false;
-app.use(async (req, res, next) => {
-  if (!isConnected) {
-    await db();
-    isConnected = true;
-  }
-  next();
-});
+await db();
 
 app.get('/', (req, res) => {
   res.send('Server is running');
@@ -37,7 +29,6 @@ app.use('/api/post', postsRouter);
 app.use('/api/story', storyRouter);
 app.use('/api/message', messageRouter);
 
-/* ✅ ONLY for local development */
 if (process.env.NODE_ENV !== 'production') {
   const PORT = process.env.PORT || 4000;
   app.listen(PORT, () =>
@@ -45,5 +36,4 @@ if (process.env.NODE_ENV !== 'production') {
   );
 }
 
-/* ✅ REQUIRED for Vercel */
 export default app;

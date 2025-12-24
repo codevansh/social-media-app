@@ -7,8 +7,7 @@ const connections = {};
 //controller function for the SSE endpoint
 export const sseController = async (req, res) => {
     const { userId } = req.params
-    console.log("New Client Connected: ", userId)
-
+    
     //Set SSE Headers
     res.setHeader('Content-Type', 'text/event-stream')
     res.setHeader('Cache-Control', 'no-cache')
@@ -25,7 +24,7 @@ export const sseController = async (req, res) => {
     req.on('close', () => {
         //remove the client res object from the connections array
         delete connections[userId];
-        console.log("Client Disconnected")
+        
     })
 }
 
