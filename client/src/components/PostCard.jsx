@@ -12,7 +12,7 @@ const PostCard = ({ post }) => {
 
     const postwithHashtags = post.content.replace(/(#\w+)/g, '<span class="text-indigo-600">$1</span>')
 
-    const getToken = useAuth()
+    const { getToken } = useAuth()
 
     const [likes, setLikes] = useState(post.likes_count)
 
@@ -22,7 +22,7 @@ const PostCard = ({ post }) => {
 
     const handleLike = async () => {
         try {
-            const { data } = await api.post('/api/post/like', { postId: post._id }, {
+            const { data } = await api.post(`/api/post/${post._id}/like`, { postId: post._id }, {
                 headers: {
                     Authorization: `Bearer ${await getToken()}`
                 }
