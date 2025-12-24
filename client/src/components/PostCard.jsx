@@ -14,7 +14,7 @@ const PostCard = ({ post }) => {
 
     const { getToken } = useAuth()
 
-    const [likes, setLikes] = useState(post.likes_count)
+    const [likes, setLikes] = useState(post.likes_count || [])
 
     const currentUser = useSelector((state) => {
         return state.user.value
@@ -41,7 +41,7 @@ const PostCard = ({ post }) => {
                 toast(data.msg)
             }
         } catch (error) {
-            toast.error(error.msg)
+            toast.error(error.response?.data?.msg || "Like failed")
         }
     }
 
