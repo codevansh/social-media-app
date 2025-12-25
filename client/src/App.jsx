@@ -29,6 +29,16 @@ const App = () => {
     const fetchData = async () => {
       if (user) {
         const token = await getToken()
+
+        await fetch(
+          import.meta.env.VITE_BASEURL + '/api/user/data',
+          {
+            headers: {
+              Authorization: `Bearer ${token}`
+            }
+          }
+        )
+
         dispatch(fetchUser(token))
         dispatch(fetchConnections(token))
       }
