@@ -5,7 +5,7 @@ import User from "../models/user.js";
 //add post
 export const addPost = async (req, res) => {
     try {
-        const { userId } = req.auth
+        const { userId } = req.auth()
         const { content, post_type } = req.body;
         const images = req.files || [];
 
@@ -49,7 +49,7 @@ export const addPost = async (req, res) => {
 //get post
 export const getPost = async (req, res) => {
     try {
-        const { userId } = req.auth
+        const { userId } = req.auth()
         const user = await User.findById(userId)
 
         if (!user) {
@@ -81,10 +81,11 @@ export const getPost = async (req, res) => {
 //like posts
 export const likePosts = async (req, res) => {
     try {
-        const { userId } = req.auth
+        const { userId } = req.auth()
         const { postId } = req.body;
 
         const post = await Post.findById(postId)
+        
         if (!post) {
             return res.status(404).json({ success: false, message: "Post not found" });
         }
@@ -92,15 +93,20 @@ export const likePosts = async (req, res) => {
         post.likes_count = post.likes_count || [];
 
         if (post.likes_count.includes(userId)) {
-            post.likes_count = post.likes_count.filter(user => user !== userId)
+
+            post.likes_count = post.likes_count.filter(id => id.toString() !== userId)
+
             await post.save()
+
             return res.status(200).json({
                 success: true,
                 message: "Post Unliked"
             })
         } else {
             post.likes_count.push(userId)
+
             await post.save()
+
             return res.status(200).json({
                 success: true,
                 message: "Post Liked"
