@@ -82,7 +82,7 @@ export const getPost = async (req, res) => {
 export const likePosts = async (req, res) => {
     try {
         const { userId } = req.auth()
-        const { postId } = req.params.id;
+        const postId = req.params.id;
 
         const post = await Post.findById(postId)
 
@@ -109,7 +109,7 @@ export const likePosts = async (req, res) => {
 
             return res.status(200).json({
                 success: true,
-                message: "Post Liked"
+                msg: "Post Liked"
             })
         }
 
