@@ -25,20 +25,20 @@ const Discover = () => {
                 setLoading(true)
 
                 const token = await getToken()
-                const { data } = await api.post('/api/user/discover', { input }, {
+                const { data } = await api.get('/api/user/discover', { input }, {
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
                 })
 
                 data.success ? setUsers(data.users) : toast.error(data.msg)
-                setLoading(false)
                 setInput("")
 
             } catch (error) {
-                toast.error(error.msg)
+                toast.error(error.response?.data?.msg || error.message)
+            }finally{
+                setLoading(false)
             }
-            setLoading(false)
         }
     }
 
