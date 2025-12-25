@@ -7,6 +7,6 @@ export const store = configureStore({
     reducer: {
         user: userReducer,
         connection: connectionReducer,
-        message: messageReducer,
+        messages: messageReducer,
     }
 })
