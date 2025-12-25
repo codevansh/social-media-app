@@ -59,7 +59,7 @@ export const getPost = async (req, res) => {
             })
         }
 
-        const userIds = [userId, ...(user.connections || []), ...(user.following || [])].filter(id => id)
+        const userIds = [userId, ...(user.connections ?? []), ...(user.following ?? [])].filter(id => id)
         const post = await Post.find({
             user: { $in: userIds }
         }).populate('user').sort({ createdAt: -1 })
@@ -82,10 +82,10 @@ export const getPost = async (req, res) => {
 export const likePosts = async (req, res) => {
     try {
         const { userId } = req.auth()
-        const { postId } = req.body;
+        const { postId } = req.params.id;
 
         const post = await Post.findById(postId)
-        
+
         if (!post) {
             return res.status(404).json({ success: false, message: "Post not found" });
         }

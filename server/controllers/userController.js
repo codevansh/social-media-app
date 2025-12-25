@@ -131,7 +131,7 @@ export const updateUserData = async (req, res) => {
 export const discoverUsers = async (req, res) => {
     try {
         const { userId } = req.auth()
-        const { input } = req.body;
+        const { input } = req.query;
 
         const allUsers = await User.find({
             $or: [
@@ -160,7 +160,7 @@ export const discoverUsers = async (req, res) => {
 export const followUser = async (req, res) => {
     try {
         const { userId } = req.auth()  // loggedin users id
-        const { id } = req.body;  // id of the other users
+        const { id } = req.params;  // id of the other users
 
         const user = await User.findById(userId)
 
@@ -354,7 +354,7 @@ export const acceptConnections = async (req, res) => {
 // ------------ // ------------ //
 export const getUserProfile = async (req, res) => {
     try {
-        const { profileId } = req.body;
+        const { profileId } = req.params;
         const profile = await User.findById(profileId)
 
         if (!profile) {
@@ -365,7 +365,7 @@ export const getUserProfile = async (req, res) => {
 
         const posts = await Post.find({
             user: profileId
-        }).populate('user')
+        }).populate('user').sort({ createdAt: -1 })
 
         res.json({
             success: true,

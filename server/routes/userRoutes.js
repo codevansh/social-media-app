@@ -14,9 +14,9 @@ userRouter.post('/update', upload.fields(
         { name: 'cover', maxCount: 1 },
     ]
 ), protect, updateUserData)
-userRouter.post('/discover', protect, discoverUsers)
-userRouter.post('/follow', protect, followUser)
-userRouter.post('/unfollow', protect, unfollowUser)
+userRouter.get('/discover', protect, discoverUsers)
+userRouter.post('/:id/follow', protect, followUser)
+userRouter.post('/:id/unfollow', protect, unfollowUser)
 
 // ------------ // ------------ //
 userRouter.post('/connect', protect, sendConnectionRequest)
@@ -24,7 +24,7 @@ userRouter.post('/acceptconnections', protect, acceptConnections)
 userRouter.get('/connections', protect, getUserConnections)
 
 // ------------ // ------------ //
-userRouter.post('/profiles', getUserProfile)
+userRouter.post('/profiles/:profileId', protect, getUserProfile)
 userRouter.post('/recent-messages', protect, getRecentChatMessage)
 
 export default userRouter
