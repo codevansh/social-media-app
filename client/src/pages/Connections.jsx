@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useAuth } from '@clerk/clerk-react';
 import { fetchConnections } from '../features/connections/connectionSlice';
 import api from '../api/axios.js'
+import { toast } from 'react-hot-toast'
 
 const Connections = () => {
     const { connections, pendingConnections, followers, following } = useSelector((state) => state.connection)
