@@ -41,7 +41,7 @@ const Chatbox = () => {
 
             if (image) formData.append('image', image)
 
-            const { data } = await api.post('/api/messages/send', formData, {
+            const { data } = await api.post('/api/message/send', formData, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
