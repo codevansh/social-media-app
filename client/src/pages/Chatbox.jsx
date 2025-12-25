@@ -49,7 +49,7 @@ const Chatbox = () => {
             if (data.success) {
                 setText("")
                 setImage(null)
-                dispatch(addMessages(data.msg))
+                dispatch(addMessages(data.message))
             } else {
                 throw new Error(data.msg)
             }
