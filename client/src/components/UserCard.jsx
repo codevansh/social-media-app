@@ -19,20 +19,22 @@ const UserCard = ({ user }) => {
 
     const handleFollow = async () => {
         try {
-            const { data } = await api.post('/api/user/follow', { id: user._id }, {
+            const token = await getToken()
+
+            const { data } = await api.post(`/api/user/${user._id}/follow`, {}, {
                 headers: {
-                    Authorization: `Bearer ${await getToken()}`
+                    Authorization: `Bearer ${token}`
                 }
             })
 
             if (data.success) {
                 toast.success(data.msg)
-                dispatch(fetchUser(await getToken()))
+                dispatch(fetchUser(token))
             } else {
                 toast.error(data.msg)
             }
         } catch (error) {
-            toast.error(error.msg)
+            toast.error(error.response?.data?.msg || error.message)
         }
     }
 
@@ -54,7 +56,7 @@ const UserCard = ({ user }) => {
                 toast.error(data.msg)
             }
         } catch (error) {
-            toast.error(error.msg)
+            toast.error(error.response?.data?.msg || error.message)
         }
     }
 
