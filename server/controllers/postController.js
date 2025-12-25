@@ -87,7 +87,9 @@ export const likePosts = async (req, res) => {
         const post = await Post.findById(postId)
 
         if (!post) {
-            return res.status(404).json({ success: false, message: "Post not found" });
+            return res.status(404).json({
+                success: false, msg: "Post not found"
+            });
         }
 
         post.likes_count = post.likes_count || [];
@@ -100,7 +102,7 @@ export const likePosts = async (req, res) => {
 
             return res.status(200).json({
                 success: true,
-                message: "Post Unliked"
+                msg: "Post Unliked"
             })
         } else {
             post.likes_count.push(userId)
@@ -117,7 +119,7 @@ export const likePosts = async (req, res) => {
         console.log(error)
         res.status(500).json({
             success: false,
-            message: "Error liking post" || error.message
+            msg: "Error liking post" || error.msg
         })
     }
 }

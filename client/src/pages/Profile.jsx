@@ -8,7 +8,7 @@ import moment from 'moment'
 import EditProfile from "../components/EditProfile";
 import { useAuth } from "@clerk/clerk-react";
 import { useSelector } from "react-redux";
-import{toast} from 'react-hot-toast'
+import { toast } from 'react-hot-toast'
 import api from '../api/axios.js'
 
 const Profile = () => {
@@ -24,7 +24,7 @@ const Profile = () => {
     const fetchUserProfile = async (profileId) => {
         const token = await getToken()
         try {
-            const { data } = await api.post(`/api/user/profiles`, { profileId }, {
+            const { data } = await api.get(`/api/user/profile/${profileId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -35,10 +35,10 @@ const Profile = () => {
                 setPosts(data.posts)
 
             } else {
-                toast.error(error.response?.data?.msg || error.message)
+                toast.error(data?.msg)
             }
         } catch (error) {
-            toast.error(error.msg)
+            toast.error(error.response?.data?.msg || error.message)
         }
 
     }
