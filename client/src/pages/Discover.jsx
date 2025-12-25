@@ -8,7 +8,7 @@ import api from '../api/axios.js'
 import { useAuth } from '@clerk/clerk-react'
 import toast from 'react-hot-toast'
 import { useDispatch } from "react-redux";
-import {fetchUser} from '../features/user/userSlice.js'
+import { fetchUser } from '../features/user/userSlice.js'
 
 const Discover = () => {
 
@@ -25,7 +25,9 @@ const Discover = () => {
                 setLoading(true)
 
                 const token = await getToken()
-                const { data } = await api.get('/api/user/discover', { input }, {
+
+                const { data } = await api.get('/api/user/discover', {
+                    params: { input },
                     headers: {
                         Authorization: `Bearer ${token}`
                     }
@@ -36,7 +38,7 @@ const Discover = () => {
 
             } catch (error) {
                 toast.error(error.response?.data?.msg || error.message)
-            }finally{
+            } finally {
                 setLoading(false)
             }
         }
